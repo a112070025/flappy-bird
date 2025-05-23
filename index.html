@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>飛飛鳥</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: #70c5ce;
+      text-align: center;
+      overscroll-behavior: none;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
+      background: #fff;
+      border: 2px solid #333;
+      touch-action: manipulation;
+    }
+    #startBtn, #restartBtn {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    #scoreBoard {
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>飛飛鳥 Flappy Clone</h1>
+  <button id="startBtn">開始遊戲</button>
+  <div id="scoreBoard" style="display:none;">分數：0</div>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <button id="restartBtn" style="display:none;">重新開始</button>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const scoreBoard = document.getElementById("scoreBoard");
+
+    let bird, pipes, score, gameLoop, gameRunning;
+    let frames = 0;
+    let pipeSpeed = 2;
+
+    class Bird {
+      constructor() {
+        this.x = 80;
+        this.y = canvas.height / 2;
+        this.size = 30;
+        this.gravity = 0.6;
+        this.lift = -7;
+        this.velocity = 0;
+      }
+      draw() {
+        ctx.font = `${this.size}px serif`;
+        ctx.fillText("🐤", this.x - this.size / 2, this.y);
+      }
+      update() {
+        this.velocity += this.gravity;
+        this.y += this.velocity;
+        if (this.y + this.size > canvas.height || this.y < 0) endGame();
+      }
+      flap() {
+        this.velocity = this.lift;
+      }
+    }
+
+    class Pipe {
+      constructor() {
+        this.top = Math.random() * 200 + 50;
+        this.gap = 140;
+        this.bottom = canvas.height - this.top - this.gap;
+        this.x = canvas.width;
+        this.w = 50;
+      }
+      draw() {
+        ctx.fillStyle = "#228B22";
+        ctx.fillRect(this.x, 0, this.w, this.top);
+        ctx.fillRect(this.x, this.top + this.gap, this.w, this.bottom);
+      }
+      update() {
+        this.x -= pipeSpeed;
+      }
+    }
+
+    function initGame() {
+      bird = new Bird();
+      pipes = [];
+      score = 0;
+      pipeSpeed = 2;
+      frames = 0;
+      gameRunning = true;
+      scoreBoard.textContent = "分數：0";
+      scoreBoard.style.display = "block";
+      restartBtn.style.display = "none";
+    }
+
+    function gameLoopFn() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      bird.update();
+      bird.draw();
+
+      if (frames % 100 === 0) pipes.push(new Pipe());
+
+      for (let i = pipes.length - 1; i >= 0; i--) {
+        pipes[i].update();
+        pipes[i].draw();
+
+        if (
+          bird.x + bird.size / 2 > pipes[i].x &&
+          bird.x - bird.size / 2 < pipes[i].x + pipes[i].w &&
+          (bird.y < pipes[i].top || bird.y > pipes[i].top + pipes[i].gap)
+        ) {
+          endGame();
+        }
+
+        if (pipes[i].x + pipes[i].w < 0) {
+          pipes.splice(i, 1);
+          score++;
+          scoreBoard.textContent = `分數：${score}`;
+        }
+      }
+
+      if (frames % 120 === 0) { // 每 2 秒加速
+        pipeSpeed += 0.2;
+      }
+
+      frames++;
+    }
+
+    function endGame() {
+      clearInterval(gameLoop);
+      gameRunning = false;
+      scoreBoard.textContent += " - 遊戲結束";
+      restartBtn.style.display = "inline-block";
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.code === "Space" && gameRunning) bird.flap();
+    });
+
+    canvas.addEventListener("click", () => {
+      if (gameRunning) bird.flap();
+    });
+
+    canvas.addEventListener("touchstart", () => {
+      if (gameRunning) bird.flap();
+    });
+
+    startBtn.onclick = () => {
+      initGame();
+      gameLoop = setInterval(gameLoopFn, 1000 / 60);
+      startBtn.style.display = "none";
+    };
+
+    restartBtn.onclick = () => {
+      initGame();
+      gameLoop = setInterval(gameLoopFn, 1000 / 60);
+    };
+  </script>
+</body>
+</html>
