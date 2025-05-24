@@ -9,18 +9,23 @@
     html, body {
       height: 100%;
       overflow: hidden;
-      background: #70c5ce;
+      background: #5c94fc;
       text-align: center;
       overscroll-behavior: none;
       touch-action: manipulation;
       -webkit-user-select: none;
       user-select: none;
     }
+    h1 {
+    color: #fff176; /* 鮮亮黃 */
+    text-shadow: 2px 2px 4px #333;
+    font-family: 'Press Start 2P', cursive; /* 像素風格字體，需載入 */
+    }
     canvas {
       display: block;
       margin: 20px auto;
-      background: #fff;
-      border: 2px solid #333;
+      background: #ffffff;
+      border: 4px solid ##3e2723;
       touch-action: manipulation;
     }
     #startBtn {
@@ -44,16 +49,17 @@
       opacity: 0.95;
     }
     #scoreBoard {
+      color: #ffe082;
       font-size: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>飛飛鳥 Flappy Clone</h1>
-  <button id="startBtn">開始遊戲</button>
-  <div id="scoreBoard" style="display:none;">分數：0</div>
+  <h1>Flappy Penguin</h1>
+  <button id="startBtn">Start</button>
+  <div id="scoreBoard" style="display:none;">Score：0</div>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
-  <button id="restartBtn">重新開始</button>
+  <button id="restartBtn">ReStart</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -130,7 +136,7 @@
       pipeSpeed = 2;
       frames = 0;
       gameRunning = true;
-      scoreBoard.textContent = "分數：0";
+      scoreBoard.textContent = "Score：0";
       scoreBoard.style.display = "block";
       restartBtn.style.display = "none";
     }
@@ -158,7 +164,7 @@
         if (pipes[i].x + pipes[i].w < 0) {
           pipes.splice(i, 1);
           score++;
-          scoreBoard.textContent = `分數：${score}`;
+          scoreBoard.textContent = `Score：${score}`;
         }
       }
 
@@ -173,7 +179,7 @@
         if (distance < 20) {
           score += 3;
           stars.splice(i, 1);
-          scoreBoard.textContent = `分數：${score}`;
+          scoreBoard.textContent = `Score：${score}`;
         } else if (stars[i].x + stars[i].size < 0) {
           stars.splice(i, 1);
         }
@@ -189,7 +195,7 @@
     function endGame() {
       clearInterval(gameLoop);
       gameRunning = false;
-      scoreBoard.textContent += " - 遊戲結束";
+      scoreBoard.innerHTML += ' -<span style="color:#a60000;"> Game Over</span>';
       restartBtn.style.display = "inline-block";
     }
 
@@ -215,4 +221,3 @@
   </script>
 </body>
 </html>
-
