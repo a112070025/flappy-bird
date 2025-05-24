@@ -23,29 +23,29 @@
       border: 2px solid #333;
       touch-action: manipulation;
     }
-    #startBtn, #restartBtn {
+    #startBtn {
       font-size: 18px;
       padding: 10px 20px;
       margin: 10px;
       cursor: pointer;
     }
+    #restartBtn {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      font-size: 20px;
+      padding: 12px 24px;
+      background: white;
+      border: 2px solid #333;
+      border-radius: 8px;
+      opacity: 0.95;
+    }
     #scoreBoard {
       font-size: 20px;
     }
-    #restartBtn {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  font-size: 20px;
-  padding: 12px 24px;
-  background: white;
-  border: 2px solid #333;
-  border-radius: 8px;
-  opacity: 0.95;
-}
   </style>
 </head>
 <body>
@@ -53,7 +53,7 @@
   <button id="startBtn">開始遊戲</button>
   <div id="scoreBoard" style="display:none;">分數：0</div>
   <canvas id="gameCanvas" width="400" height="600"></canvas>
-  <button id="restartBtn" style="display:none;">重新開始</button>
+  <button id="restartBtn">重新開始</button>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -62,7 +62,7 @@
     const restartBtn = document.getElementById("restartBtn");
     const scoreBoard = document.getElementById("scoreBoard");
 
-    let bird, pipes, score, gameLoop, gameRunning;
+    let bird, pipes, stars, score, gameLoop, gameRunning;
     let frames = 0;
     let pipeSpeed = 2;
 
@@ -107,9 +107,25 @@
       }
     }
 
+    class Star {
+      constructor() {
+        this.x = canvas.width;
+        this.y = Math.random() * (canvas.height - 100) + 50;
+        this.size = 24;
+      }
+      draw() {
+        ctx.font = `${this.size}px serif`;
+        ctx.fillText("⭐", this.x - this.size / 2, this.y);
+      }
+      update() {
+        this.x -= pipeSpeed;
+      }
+    }
+
     function initGame() {
       bird = new Bird();
       pipes = [];
+      stars = [];
       score = 0;
       pipeSpeed = 2;
       frames = 0;
@@ -125,6 +141,7 @@
       bird.draw();
 
       if (frames % 100 === 0) pipes.push(new Pipe());
+      if (frames % 180 === 0) stars.push(new Star());
 
       for (let i = pipes.length - 1; i >= 0; i--) {
         pipes[i].update();
@@ -145,7 +162,24 @@
         }
       }
 
-      if (frames % 120 === 0) { // 每 2 秒加速
+      for (let i = stars.length - 1; i >= 0; i--) {
+        stars[i].update();
+        stars[i].draw();
+
+        const dx = bird.x - stars[i].x;
+        const dy = bird.y - stars[i].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 20) {
+          score += 3;
+          stars.splice(i, 1);
+          scoreBoard.textContent = `分數：${score}`;
+        } else if (stars[i].x + stars[i].size < 0) {
+          stars.splice(i, 1);
+        }
+      }
+
+      if (frames % 120 === 0) {
         pipeSpeed += 0.2;
       }
 
