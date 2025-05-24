@@ -197,9 +197,10 @@
       if (e.code === "Space" && gameRunning) bird.flap();
     });
 
-    canvas.addEventListener("touchstart", () => {
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault(); // 🔒 防止點兩次
       if (gameRunning) bird.flap();
-    });
+    }, { passive: false });
 
     startBtn.onclick = () => {
       initGame();
