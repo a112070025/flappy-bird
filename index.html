@@ -197,10 +197,6 @@
       if (e.code === "Space" && gameRunning) bird.flap();
     });
 
-    canvas.addEventListener("click", () => {
-      if (gameRunning) bird.flap();
-    });
-
     canvas.addEventListener("touchstart", () => {
       if (gameRunning) bird.flap();
     });
@@ -218,3 +214,4 @@
   </script>
 </body>
 </html>
+
